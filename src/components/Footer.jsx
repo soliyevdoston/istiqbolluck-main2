@@ -50,7 +50,7 @@ export default function Footer() {
               />
               <div className="text-xl sm:text-2xl font-black italic flex gap-2 leading-none">
                 <span className="text-[#E43E1C]">ISTIQBOL</span>
-                <span className="text-black dark:text-white">LUCK</span>
+                <span className="text-[#2E3192] dark:text-white">LUCK</span>
               </div>
             </Link>
             <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed font-medium max-w-xs">

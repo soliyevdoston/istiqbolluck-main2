@@ -1,23 +1,31 @@
-import React from "react";
+import React, { useEffect } from "react"; // useEffect ni import qiling
 import { useParams, Link } from "react-router-dom";
 import { blogPosts } from "../data/blogData";
 import { motion } from "framer-motion";
-import { ArrowLeft, Calendar, User, Tag } from "lucide-react";
+import { ArrowLeft, Calendar, Tag } from "lucide-react";
 
 export default function BlogDetail() {
   const { id } = useParams();
   const post = blogPosts.find((p) => p.id === parseInt(id));
 
+  // --- SAHIFA YUKLANGANDA TEPAGA CHIQARISH MANTIQI ---
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [id]); // ID o'zgarganda skroll tepaga chiqadi
+  // -----------------------------------------------
+
   if (!post)
     return (
-      <div className="pt-40 text-center dark:text-white">Maqola topilmadi</div>
+      <div className="pt-40 text-center dark:text-white font-black uppercase">
+        Maqola topilmadi
+      </div>
     );
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="pt-32 pb-24 bg-white dark:bg-black min-h-screen"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="pt-32 pb-24 bg-white dark:bg-[#050505] min-h-screen"
     >
       <div className="max-w-4xl mx-auto px-6">
         <Link
@@ -40,14 +48,17 @@ export default function BlogDetail() {
           </div>
         </div>
 
-        <img
+        <motion.img
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2 }}
           src={post.image}
-          className="w-full h-auto rounded-[3rem] mb-12 shadow-2xl"
+          className="w-full h-auto rounded-[2rem] md:rounded-[3rem] mb-12 shadow-2xl"
           alt={post.title}
         />
 
         <div className="prose prose-xl dark:prose-invert max-w-none">
-          <p className="text-xl md:text-2xl text-zinc-600 dark:text-zinc-300 leading-relaxed whitespace-pre-line font-medium">
+          <p className="text-lg md:text-2xl text-zinc-600 dark:text-zinc-300 leading-relaxed whitespace-pre-line font-medium italic">
             {post.content}
           </p>
         </div>

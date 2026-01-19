@@ -14,11 +14,7 @@ export default function Header() {
   }, [location]);
 
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
+    document.body.style.overflow = isOpen ? "hidden" : "unset";
   }, [isOpen]);
 
   const scrollToTop = () => {
@@ -36,53 +32,45 @@ export default function Header() {
 
   return (
     <>
-      <header className="fixed top-0 w-full z-[100] h-20 flex items-center justify-between px-6 md:px-10 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-gray-100 dark:border-zinc-900 transition-colors">
+      <header className="fixed top-0 w-full z-[100] h-16 md:h-20 flex items-center justify-between px-4 md:px-10 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-gray-100 dark:border-zinc-900 transition-all">
         {/* LOGO */}
         <Link
           to="/"
           onClick={scrollToTop}
-          className="font-black text-xl md:text-2xl flex gap-2 md:gap-[10px] items-center italic tracking-tighter shrink-0"
+          className="flex gap-2 items-center italic tracking-tighter shrink-0"
         >
           <img
-            className="w-[35px] h-[35px] md:w-[40px] md:h-[40px] object-contain"
+            className="w-8 h-8 md:w-10 md:h-10 object-contain"
             src={Logo}
             alt="Logo"
           />
-          <div className="leading-none">
+          <div className="font-black text-lg md:text-xl leading-none">
             <span className="text-[#E43E1C]">ISTIQBOL</span>{" "}
             <span className="text-[#2E3192] dark:text-white">LUCK</span>
           </div>
         </Link>
 
         {/* DESKTOP NAVIGATION */}
-        <nav className="hidden lg:flex gap-10 font-bold text-[11px] uppercase tracking-widest">
+        <nav className="hidden lg:flex gap-8 xl:gap-10 font-bold text-[10px] xl:text-[11px] uppercase tracking-widest">
           {navLinks.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}
               onClick={scrollToTop}
               className={({ isActive }) => `
-                relative pb-2 transition-colors hover:text-[#39B54A]
+                relative pb-1 transition-colors hover:text-[#39B54A]
                 ${isActive ? "text-[#39B54A]" : "text-gray-600 dark:text-gray-300"}
                 group
               `}
             >
-              {({ isActive }) => (
-                <>
-                  {link.label}
-                  <span
-                    className={`absolute bottom-0 left-0 h-[2px] bg-[#39B54A] transition-all duration-300 
-                    ${isActive ? "w-full" : "w-0 group-hover:w-full"}`}
-                  ></span>
-                </>
-              )}
+              {link.label}
+              <span className="absolute bottom-0 left-0 h-[2px] bg-[#39B54A] transition-all duration-300 w-0 group-hover:w-full"></span>
             </NavLink>
           ))}
         </nav>
 
         {/* RIGHT ACTIONS */}
-        <div className="flex items-center gap-3 md:gap-4">
-          {/* DARK MODE TUGMASI - Har doim ko'rinib turadi */}
+        <div className="flex items-center gap-2 md:gap-4">
           <ThemeToggle />
 
           <a
@@ -94,17 +82,17 @@ export default function Header() {
 
           <a
             href="tel:+998901234567"
-            className="bg-[#39B54A] text-white p-2.5 md:p-3 rounded-full hover:scale-110 transition-transform flex items-center justify-center shadow-lg"
+            className="bg-[#39B54A] text-white p-2 md:p-3 rounded-full hover:scale-105 transition-transform flex items-center justify-center shadow-md"
           >
-            <Phone size={18} fill="currentColor" />
+            <Phone size={16} md:size={18} fill="currentColor" />
           </a>
 
           {/* BURGER BUTTON */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="lg:hidden p-2 text-zinc-900 dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors"
+            className="lg:hidden p-2 text-zinc-900 dark:text-white transition-colors"
           >
-            {isOpen ? <X size={28} /> : <Menu size={28} />}
+            {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </header>
@@ -118,7 +106,7 @@ export default function Header() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[110] lg:hidden"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] lg:hidden"
             />
 
             <motion.div
@@ -126,33 +114,29 @@ export default function Header() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed right-0 top-0 h-full w-[85%] max-w-[400px] bg-white dark:bg-[#0a0a0a] z-[120] shadow-2xl lg:hidden p-10 flex flex-col"
+              className="fixed right-0 top-0 h-full w-[70%] max-w-[280px] bg-white dark:bg-[#0a0a0a] z-[120] shadow-2xl lg:hidden p-6 flex flex-col"
             >
-              <div className="flex justify-between items-center mb-12">
-                <span className="font-black italic text-zinc-400 uppercase tracking-widest text-xs">
+              <div className="flex justify-between items-center mb-10">
+                <span className="font-black italic text-zinc-400 uppercase tracking-widest text-[10px]">
                   Menu
                 </span>
-                <div className="flex items-center gap-4">
-                  {/* Mobil menyu ichida qo'shimcha qulaylik uchun ThemeToggle */}
-                  <ThemeToggle />
-                  <button
-                    onClick={() => setIsOpen(false)}
-                    className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-full"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-full dark:text-white"
+                >
+                  <X size={18} />
+                </button>
               </div>
 
-              <nav className="flex flex-col gap-6 flex-1">
+              <nav className="flex flex-col gap-4 flex-1">
                 {navLinks.map((link) => (
                   <NavLink
                     key={link.to}
                     to={link.to}
                     onClick={scrollToTop}
                     className={({ isActive }) => `
-                      text-3xl font-black italic uppercase tracking-tighter transition-all
-                      ${isActive ? "text-[#39B54A] translate-x-4" : "text-zinc-800 dark:text-white hover:text-[#39B54A] hover:translate-x-2"}
+                      text-lg font-bold italic uppercase tracking-tight transition-all py-2
+                      ${isActive ? "text-[#39B54A] border-l-4 border-[#39B54A] pl-3" : "text-zinc-800 dark:text-white"}
                     `}
                   >
                     {link.label}
@@ -161,30 +145,27 @@ export default function Header() {
               </nav>
 
               {/* Bottom Mobile Info */}
-              <div className="mt-auto space-y-8">
-                <div className="space-y-2">
-                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                    Bog'lanish
+              <div className="mt-auto space-y-6 pt-6 border-t border-gray-100 dark:border-zinc-800">
+                <div className="space-y-1">
+                  <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">
+                    Aloqa
                   </p>
                   <a
                     href="tel:+998901234567"
-                    className="text-xl font-black block dark:text-white"
+                    className="text-sm font-black block dark:text-white"
                   >
                     +998 90 123 45 67
                   </a>
-                  <p className="text-sm text-zinc-500 font-medium italic">
-                    info@istiqbol.uz
-                  </p>
                 </div>
 
-                <div className="flex gap-4">
+                <div className="flex gap-3">
                   {[Instagram, Send, Youtube].map((Icon, i) => (
                     <a
                       key={i}
                       href="#"
-                      className="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center hover:bg-[#39B54A] hover:text-white transition-all dark:text-white"
+                      className="w-9 h-9 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center hover:bg-[#39B54A] hover:text-white transition-all dark:text-white"
                     >
-                      <Icon size={20} />
+                      <Icon size={16} />
                     </a>
                   ))}
                 </div>

@@ -54,3 +54,22 @@
   -webkit-text-stroke: 1px currentColor;
   color: transparent;
 }
+.glass-stat {
+  @apply flex items-center gap-3 px-4 py-3 rounded-2xl
+  bg-white/10 backdrop-blur-xl
+  border border-white/20
+  font-black text-sm uppercase
+  shadow-lg;
+}
+.modal-stat {
+  @apply flex items-center gap-3 px-4 py-3 rounded-2xl
+  font-black uppercase text-sm
+  transition-all
+
+  /* LIGHT */
+  bg-zinc-300 text-zinc-800 border border-zinc-900
+
+  /* DARK */
+  dark:bg-white/10 dark:text-white
+  dark:border-white/20 dark:backdrop-blur-xl;
+}
