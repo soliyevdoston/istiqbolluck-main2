@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from "react";
+import React, { useState, useMemo, useEffect, memo } from "react";
 import {
   BarChart,
   Bar,
@@ -22,11 +22,8 @@ import {
   Brain,
   CheckCircle2,
   ArrowUpRight,
-  ArrowDownRight,
-  Minus,
 } from "lucide-react";
 
-// 1. YORDAMCHI FUNKSIYALAR
 const roundNum = (num) => Math.round(parseFloat(num || 0) * 10) / 10;
 
 const DEFAULT_STUDENT = {
@@ -38,7 +35,7 @@ const DEFAULT_STUDENT = {
   history: [
     {
       date: "31.10.2025",
-      cert: 4, // Sertifikatlar soni
+      cert: 4,
       totalBall: 189.0,
       grantChance: 100,
       stats: [
@@ -63,17 +60,16 @@ export default function DtmPremium() {
   const SHEET_NAME = "dtms";
 
   useEffect(() => {
-    const controller = new AbortController();
-
+    let active = true;
     const fetchSheetsData = async () => {
       try {
         const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}`;
-        const response = await fetch(url, { signal: controller.signal });
+        const response = await fetch(url);
         const text = await response.text();
         const json = JSON.parse(text.substring(47).slice(0, -2));
         const rows = json.table.rows;
 
-        const formatted = {};
+        const formatted = { "0000": DEFAULT_STUDENT };
         rows.forEach((row) => {
           const c = row.c;
           const id = c[2]?.v ? String(c[2].v) : null;
@@ -90,7 +86,7 @@ export default function DtmPremium() {
           }
           formatted[id].history.push({
             date: c[0]?.f || c[0]?.v || "N/A",
-            cert: c[16]?.v || 0, // Google Sheets'dan sertifikat ustunini olish
+            cert: c[16]?.v || 0,
             totalBall: roundNum(c[10]?.v),
             grantChance: Math.round((c[10]?.v / 189) * 100),
             stats: [
@@ -128,15 +124,18 @@ export default function DtmPremium() {
           });
         });
 
-        setStudentsData((prev) => ({ ...prev, ...formatted }));
-        setLoading(false);
+        if (active) {
+          setStudentsData(formatted);
+          setLoading(false);
+        }
       } catch (error) {
-        if (error.name !== "AbortError") setLoading(false);
+        if (active) setLoading(false);
       }
     };
-
     fetchSheetsData();
-    return () => controller.abort();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const student = useMemo(
@@ -144,7 +143,7 @@ export default function DtmPremium() {
     [studentsData, currentId],
   );
   const currentTest = useMemo(
-    () => student?.history[testIndex] || student?.history[0],
+    () => student.history[testIndex] || student.history[0],
     [student, testIndex],
   );
 
@@ -160,18 +159,15 @@ export default function DtmPremium() {
   if (loading)
     return (
       <div className="h-screen flex items-center justify-center bg-white dark:bg-[#050505]">
-        <style>{`
-          @keyframes spin-y { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
-          .animate-spin-y { animation: spin-y 2s linear infinite; }
-        `}</style>
+        <style>{`@keyframes spin-y { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } } .animate-spin-y { animation: spin-y 2s linear infinite; }`}</style>
         <img src="/logo.svg" alt="Logo" className="w-20 h-20 animate-spin-y" />
       </div>
     );
 
   return (
-    <div className="min-h-screen lg:h-screen bg-[#f8fafc] dark:bg-[#050505] pt-20 pb-4 px-4 lg:px-8 font-sans flex flex-col lg:overflow-hidden transition-all duration-500">
-      <div className="max-w-[1600px] mx-auto w-full flex-1 flex flex-col gap-4 min-h-0">
-        {/* HEADER */}
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#050505] pt-24 pb-10 px-4 lg:px-8 font-sans transition-all duration-500 overflow-x-hidden">
+      <div className="max-w-[1600px] mx-auto w-full flex flex-col gap-6">
+        {/* HEADER / SEARCH */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 shrink-0">
           <div className="flex items-center gap-3">
             <div className="bg-black p-2 rounded-xl border border-[#39B54A]/30 shadow-lg">
@@ -188,7 +184,7 @@ export default function DtmPremium() {
             <input
               type="text"
               placeholder="ID raqam..."
-              className="w-full py-3 px-6 rounded-2xl bg-white dark:bg-zinc-900 shadow-xl outline-none font-bold text-md dark:text-white border border-zinc-200 dark:border-zinc-800"
+              className="w-full py-3 px-6 rounded-2xl bg-white dark:bg-zinc-900 shadow-xl outline-none font-bold dark:text-white border border-zinc-200 dark:border-zinc-800"
               value={searchId}
               onChange={(e) => setSearchId(e.target.value)}
             />
@@ -201,36 +197,36 @@ export default function DtmPremium() {
           </form>
         </div>
 
-        {/* DASHBOARD GRID */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-0">
-          {/* LEFT: STATS (Endi 4 ta kichik karta) */}
+        {/* MAIN DASHBOARD */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-0">
+          {/* LEFT: STATS */}
           <div className="lg:col-span-2 grid grid-cols-2 lg:flex lg:flex-col gap-3 min-h-0">
-            <StatCardVertical
+            <StatCard
               icon={<TrendingUp size={20} />}
               label="Reyting"
               value={student.rank}
               color="blue"
             />
-            <StatCardVertical
+            <StatCard
               icon={<Zap size={20} />}
               label="Percentile"
               value={student.percentile + "%"}
               color="yellow"
             />
-            <StatCardVertical
+            <StatCard
               icon={<Award size={20} />}
               label="Sertifikat"
               value={currentTest.cert}
               color="purple"
             />
-            <StatCardVertical
+            <StatCard
               icon={<CheckCircle2 size={20} />}
               label="Grant"
               value={currentTest.grantChance + "%"}
               color="green"
             />
 
-            <div className="col-span-2 lg:flex-1 bg-white dark:bg-zinc-900 p-4 rounded-[2rem] shadow-xl border-2 border-white dark:border-zinc-800 flex flex-col items-center justify-center text-center">
+            <div className="col-span-2 lg:flex-1 bg-white dark:bg-zinc-900 p-6 rounded-[2rem] shadow-xl border-2 border-white dark:border-zinc-800 flex flex-col items-center justify-center text-center">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">
                 Jami Ball
               </p>
@@ -240,20 +236,18 @@ export default function DtmPremium() {
             </div>
           </div>
 
-          {/* CENTER: DIAGRAMMA */}
-          <div className="lg:col-span-6 bg-white dark:bg-zinc-900 p-6 rounded-[2.5rem] shadow-2xl border border-white dark:border-zinc-800 flex flex-col min-h-0 overflow-hidden">
-            <div className="flex justify-between items-center mb-6 shrink-0">
-              <h3 className="text-lg font-black uppercase italic dark:text-white flex items-center gap-2 leading-none">
-                <Calendar className="text-[#39B54A]" size={20} />{" "}
-                {currentTest.date} natijasi
-              </h3>
-            </div>
+          {/* CENTER: DIAGRAMMA (Qotmaydigan qismlar) */}
+          <div className="lg:col-span-6 bg-white dark:bg-zinc-900 p-6 rounded-[2.5rem] shadow-2xl border border-white dark:border-zinc-800 flex flex-col min-h-[450px] overflow-hidden">
+            <h3 className="text-lg font-black uppercase italic dark:text-white flex items-center gap-2 mb-8 shrink-0">
+              <Calendar className="text-[#39B54A]" size={20} />{" "}
+              {currentTest.date} natijasi
+            </h3>
 
-            <div className="flex-1 w-full min-h-0 relative">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="flex-1 w-full relative min-h-0 overflow-hidden">
+              <ResponsiveContainer width="100%" height="100%" debounce={100}>
                 <BarChart
                   data={currentTest.stats}
-                  margin={{ top: 20, bottom: 0, left: -20, right: 0 }}
+                  margin={{ top: 25, bottom: 0, left: -30, right: 10 }}
                 >
                   <CartesianGrid
                     strokeDasharray="3 3"
@@ -266,28 +260,34 @@ export default function DtmPremium() {
                     tickLine={false}
                     tick={{ fill: "#888", fontSize: 11, fontWeight: "bold" }}
                   />
-                  <YAxis hide domain={[0, 32]} />
+                  <YAxis hide domain={[0, 35]} />
                   <Tooltip
                     cursor={{ fill: "transparent" }}
                     contentStyle={{ borderRadius: "15px", border: "none" }}
                   />
-                  <Bar dataKey="score" radius={[8, 8, 0, 0]} barSize={45}>
+                  <Bar
+                    dataKey="score"
+                    radius={[8, 8, 0, 0]}
+                    barSize={45}
+                    isAnimationActive={false}
+                  >
                     {currentTest.stats.map((entry, index) => (
                       <Cell key={index} fill={entry.color} />
                     ))}
                     <LabelList
                       dataKey="score"
                       position="top"
-                      content={(props) => (
+                      content={(p) => (
                         <text
-                          x={props.x + props.width / 2}
-                          y={props.y - 10}
-                          fill="#888"
-                          fontSize={10}
-                          fontWeight="bold"
+                          x={p.x + p.width / 2}
+                          y={p.y - 12}
+                          fill={currentTest.stats[p.index]?.color}
+                          fontSize={11}
+                          fontWeight="900"
                           textAnchor="middle"
+                          className="italic"
                         >
-                          {props.value}/{currentTest.stats[props.index].max}
+                          {p.value}/{currentTest.stats[p.index].max}
                         </text>
                       )}
                     />
@@ -295,27 +295,11 @@ export default function DtmPremium() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-
-            <div className="grid grid-cols-5 gap-2 mt-6 border-t border-zinc-100 dark:border-zinc-800 pt-4 shrink-0">
-              {currentTest.stats.map((item, i) => (
-                <div
-                  key={i}
-                  className="text-center p-2 rounded-xl bg-slate-50 dark:bg-zinc-800/40"
-                >
-                  <p className="text-[8px] font-black uppercase text-zinc-400 mb-1 truncate">
-                    {item.name}
-                  </p>
-                  <p className="text-xs font-black dark:text-white">
-                    {item.score}/{item.max}
-                  </p>
-                </div>
-              ))}
-            </div>
           </div>
 
           {/* RIGHT: PROFILE & AI */}
-          <div className="lg:col-span-4 flex flex-col gap-4 min-h-0">
-            <div className="bg-[#0f172a] p-6 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden border border-[#39B54A]/20 shrink-0">
+          <div className="lg:col-span-4 flex flex-col gap-6 min-h-0">
+            <div className="bg-[#0f172a] p-8 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden border border-[#39B54A]/20 shrink-0">
               <h2 className="text-2xl md:text-3xl font-black uppercase italic leading-none mb-6 break-words">
                 {student.name}
               </h2>
@@ -331,8 +315,8 @@ export default function DtmPremium() {
               </div>
             </div>
 
-            <div className="flex-1 bg-white dark:bg-zinc-900 p-6 rounded-[2.5rem] shadow-xl border border-white dark:border-zinc-800 flex flex-col min-h-0">
-              <div className="flex items-center gap-3 mb-4 shrink-0">
+            <div className="flex-1 bg-white dark:bg-zinc-900 p-8 rounded-[2.5rem] shadow-xl border border-white dark:border-zinc-800 flex flex-col min-h-0">
+              <div className="flex items-center gap-3 mb-6 shrink-0">
                 <div className="p-2 bg-purple-500/10 rounded-xl text-purple-500">
                   <Brain size={24} />
                 </div>
@@ -341,9 +325,9 @@ export default function DtmPremium() {
                 </h4>
               </div>
               <div className="flex-1 flex flex-col justify-center min-h-0">
-                <div className="flex items-center justify-between bg-slate-50 dark:bg-zinc-800 p-3 rounded-2xl border dark:border-zinc-700 mb-4 shrink-0">
+                <div className="flex items-center justify-between bg-slate-50 dark:bg-zinc-800 p-4 rounded-2xl border dark:border-zinc-700 mb-6 shrink-0">
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">
-                    Dinamika (2 Blok)
+                    Dinamika
                   </p>
                   <div className="flex items-center text-[#39B54A] font-black text-lg">
                     <ArrowUpRight size={20} /> +2.4
@@ -359,14 +343,14 @@ export default function DtmPremium() {
         </div>
 
         {/* HISTORY Panorama */}
-        <div className="shrink-0 h-14 flex items-center gap-3 px-6 bg-white dark:bg-zinc-900 rounded-xl border border-white dark:border-zinc-800 overflow-x-auto no-scrollbar">
+        <div className="shrink-0 h-16 flex items-center gap-3 px-6 bg-white dark:bg-zinc-900 rounded-2xl border dark:border-zinc-800 overflow-x-auto no-scrollbar shadow-sm">
           <History size={16} className="text-slate-400 shrink-0" />
           <div className="flex gap-2">
             {student.history.map((t, i) => (
               <button
                 key={i}
                 onClick={() => setTestIndex(i)}
-                className={`px-4 py-1.5 rounded-lg text-[10px] font-black transition-all border ${testIndex === i ? "bg-[#39B54A] text-black border-[#39B54A]" : "bg-white dark:bg-zinc-800 text-slate-400 border-transparent"}`}
+                className={`px-6 py-2 rounded-xl text-[10px] font-black transition-all border whitespace-nowrap ${testIndex === i ? "bg-[#39B54A] text-black border-[#39B54A]" : "bg-white dark:bg-zinc-800 text-slate-400 border-zinc-100 dark:border-zinc-700"}`}
               >
                 {t.date}
               </button>
@@ -378,7 +362,8 @@ export default function DtmPremium() {
   );
 }
 
-function StatCardVertical({ icon, label, value, color }) {
+// MEMOIZED STAT CARD TO PREVENT UNNECESSARY RENDERS
+const StatCard = memo(({ icon, label, value, color }) => {
   const themes = {
     blue: "border-blue-500/20 text-blue-500 bg-blue-500/5",
     yellow: "border-yellow-500/20 text-yellow-500 bg-yellow-500/5",
@@ -387,15 +372,15 @@ function StatCardVertical({ icon, label, value, color }) {
   };
   return (
     <div
-      className={`p-4 rounded-[1.5rem] border-2 ${themes[color]} bg-white dark:bg-zinc-900 flex flex-col lg:items-center justify-center lg:text-center shadow-md transition-all hover:translate-x-1 shrink-0`}
+      className={`p-4 rounded-2xl border-2 ${themes[color]} bg-white dark:bg-zinc-900 flex flex-col items-center justify-center text-center shadow-md transition-all hover:scale-[1.02] shrink-0`}
     >
       <div className="mb-1">{icon}</div>
       <p className="text-[8px] font-black uppercase text-zinc-400 tracking-[0.1em] mb-1 leading-none">
         {label}
       </p>
-      <p className="text-lg lg:text-xl font-black dark:text-white leading-none italic">
+      <p className="text-lg font-black dark:text-white leading-none italic">
         {value}
       </p>
     </div>
   );
-}
+});
