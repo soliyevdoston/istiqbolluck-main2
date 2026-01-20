@@ -64,7 +64,7 @@ export default function Footer() {
                 <span className="text-[#2E3192] dark:text-white">LUCK</span>
               </div>
             </Link>
-            <p className="text-sm text-slate-600 dark:text-slate-400 max-w-xs">
+            <p className="text-sm text-slate-600 dark:text-slate-400 max-w-xs text-center sm:text-left">
               Biz faqat ta'lim bermaymiz, biz muvaffaqiyatli kelajak poydevorini
               quramiz.
             </p>
@@ -78,7 +78,7 @@ export default function Footer() {
                 to={link.to}
                 end={link.end}
                 onClick={scrollToTop}
-                className="text-sm font-semibold hover:text-[#39B54A]"
+                className="text-sm font-semibold hover:text-[#39B54A] transition-colors"
               >
                 {link.label}
               </NavLink>
@@ -89,14 +89,14 @@ export default function Footer() {
           <div className="space-y-4 text-center sm:text-left">
             <a
               href="tel:+998901234567"
-              className="flex items-center gap-3 justify-center sm:justify-start"
+              className="flex items-center gap-3 justify-center sm:justify-start hover:text-[#39B54A] transition-colors"
             >
               <Phone size={18} />
               <span className="font-bold">+998 90 123 45 67</span>
             </a>
             <a
               href="mailto:info@istiqbol.uz"
-              className="flex items-center gap-3 justify-center sm:justify-start"
+              className="flex items-center gap-3 justify-center sm:justify-start hover:text-[#39B54A] transition-colors"
             >
               <Mail size={18} />
               <span className="font-bold">info@istiqbol.uz</span>
@@ -113,7 +113,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={s.label}
-                  className={`w-10 h-10 flex items-center justify-center rounded-xl bg-white/30 transition-all ${s.color}`}
+                  className={`w-10 h-10 flex items-center justify-center rounded-xl bg-white/30 dark:bg-white/10 transition-all ${s.color} hover:text-white`}
                 >
                   {s.icon}
                 </a>
@@ -122,7 +122,7 @@ export default function Footer() {
 
             <button
               onClick={scrollToTop}
-              className="mt-6 inline-flex items-center gap-2 bg-[#39B54A] text-white px-6 py-3 rounded-xl"
+              className="mt-6 inline-flex items-center gap-2 bg-[#39B54A] text-white px-6 py-3 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-[#39B54A]/20"
             >
               Yuqoriga qaytish
               <ArrowUpRight size={16} />
@@ -130,8 +130,20 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 pt-6 border-t text-center text-[10px] text-slate-500">
-          © 2026 ISTIQBOL LUCK. Barcha huquqlar himoyalangan.
+        {/* BOTTOM SECTION */}
+        <div className="mt-12 pt-6 border-t border-slate-300 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] text-slate-500 uppercase tracking-widest font-bold">
+          <div className="text-center md:text-left">
+            © 2026 ISTIQBOL LUCK. Barcha huquqlar himoyalangan.
+          </div>
+          <a
+            href="https://soliyev.uz"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-[#39B54A] transition-colors flex items-center gap-1"
+          >
+            Developed by{" "}
+            <span className="text-slate-900 dark:text-white">soliyev.uz</span>
+          </a>
         </div>
       </div>
     </footer>
