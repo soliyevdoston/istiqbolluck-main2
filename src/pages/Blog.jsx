@@ -5,12 +5,10 @@ import { blogPosts, certificates } from "../data/blogData";
 import {
   Award,
   Calendar,
-  ArrowUpRight,
+  ArrowRight,
   X,
   Filter,
   Clock,
-  ArrowRight,
-  CheckCircle2,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
@@ -19,27 +17,30 @@ export default function Blog() {
   const [selectedCert, setSelectedCert] = useState(null);
   const [activeCategory, setActiveCategory] = useState("Barchasi");
 
-  // Kategoriyalarni aniqlash
-  const categories = [
-    "Barchasi",
-    ...new Set(blogPosts.map((post) => post.category)),
-  ];
+  // Kategoriyalar
+  const categories = useMemo(() => {
+    return ["Barchasi", ...new Set(blogPosts.map((post) => post.category))];
+  }, []);
 
-  // Filtrlash (Faqat kategoriya bo'yicha)
+  // Filtrlash
   const filteredPosts = useMemo(() => {
     return activeCategory === "Barchasi"
       ? blogPosts
       : blogPosts.filter((post) => post.category === activeCategory);
   }, [activeCategory]);
 
-  // Modal ochiqligida scrollni to'xtatish
+  // Modal ochilganda scrollni o'chirish
   useEffect(() => {
-    document.body.style.overflow = selectedCert ? "hidden" : "unset";
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    document.body.style.overflow = selectedCert ? "hidden" : originalStyle;
+    return () => {
+      document.body.style.overflow = originalStyle;
+    };
   }, [selectedCert]);
 
   return (
     <div className="bg-[#fcfcfc] dark:bg-[#050505] transition-colors min-h-screen font-sans pt-24 pb-20 overflow-x-hidden">
-      {/* --- 🚀 HERO SECTION --- */}
+      {/* HERO */}
       <section className="max-w-7xl mx-auto px-6 pt-12 pb-16">
         <div className="grid lg:grid-cols-2 gap-10 items-end border-b border-zinc-100 dark:border-zinc-900 pb-16">
           <div>
@@ -76,7 +77,7 @@ export default function Blog() {
         </div>
       </section>
 
-      {/* --- 📂 CATEGORY FILTERS --- */}
+      {/* CATEGORY FILTERS */}
       <section className="max-w-7xl mx-auto px-6 mb-16">
         <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-2">
           <div className="p-3 bg-zinc-100 dark:bg-zinc-900 rounded-2xl text-zinc-400 shrink-0">
@@ -98,7 +99,7 @@ export default function Blog() {
         </div>
       </section>
 
-      {/* --- 📚 BLOG GRID --- */}
+      {/* BLOG GRID */}
       <section className="max-w-7xl mx-auto px-6 mb-32">
         <motion.div
           layout
@@ -109,16 +110,17 @@ export default function Blog() {
               <motion.article
                 key={post.id}
                 layout
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
+                exit={{ opacity: 0, scale: 0.95 }}
                 className="group flex flex-col bg-white dark:bg-zinc-900/50 rounded-[3rem] border border-zinc-100 dark:border-zinc-800 overflow-hidden hover:shadow-3xl transition-all duration-500"
               >
                 <div className="relative aspect-[16/10] overflow-hidden">
                   <img
                     src={post.image}
-                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                     alt="blog"
+                    loading="lazy"
                   />
                   <div className="absolute top-6 left-6">
                     <span className="px-4 py-2 bg-white/90 dark:bg-black/90 backdrop-blur-md text-[9px] font-black uppercase rounded-xl dark:text-white">
@@ -126,7 +128,6 @@ export default function Blog() {
                     </span>
                   </div>
                 </div>
-
                 <div className="p-8 flex flex-col flex-1">
                   <div className="flex items-center gap-4 mb-4 text-zinc-400 text-[10px] font-black uppercase tracking-widest">
                     <span className="flex items-center gap-1.5">
@@ -138,14 +139,12 @@ export default function Blog() {
                       <Clock size={14} /> 5 MIN
                     </span>
                   </div>
-
                   <h3 className="text-2xl font-black dark:text-white uppercase italic leading-tight mb-4 group-hover:text-[#39B54A] transition-colors line-clamp-2">
                     {post.title}
                   </h3>
                   <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed mb-8 line-clamp-3">
                     {post.desc}
                   </p>
-
                   <div className="mt-auto flex items-center justify-between pt-6 border-t dark:border-zinc-800">
                     <Link
                       to={`/blog/${post.id}`}
@@ -165,10 +164,9 @@ export default function Blog() {
         </motion.div>
       </section>
 
-      {/* --- 🏆 CERTIFICATES SECTION (Sahifa oxirida) --- */}
+      {/* CERTIFICATES */}
       <section className="bg-zinc-50 dark:bg-[#080808] py-20 md:py-32 border-y dark:border-zinc-900 transition-colors">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
-          {/* Sarlavha qismi: Mobilda items-start (chap), MD ekranda items-end (o'ng bilan moslashgan) */}
           <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-12 md:mb-20 gap-6 md:gap-8">
             <div className="text-left">
               <motion.div
@@ -181,32 +179,28 @@ export default function Blog() {
                   Global Achievements
                 </span>
               </motion.div>
-
-              {/* text-4xl mobilda sig'ishi uchun, md:text-8xl katta ekran uchun */}
               <h2 className="text-4xl sm:text-5xl md:text-8xl font-black dark:text-white tracking-tighter uppercase italic leading-[0.9] md:leading-[0.8]">
                 XALQARO <br /> <span className="text-[#E43E1C]">YUTUQLAR</span>
               </h2>
             </div>
-
-            {/* Award Ikonkasi: Mobilda chapda turishi uchun self-start */}
             <div className="p-5 md:p-8 bg-white dark:bg-zinc-900 rounded-full shadow-xl border border-zinc-100 dark:border-zinc-800 self-start md:self-auto">
-              <Award size={32} className="text-[#E43E1C] md:size-[50px]" />
+              <Award size={32} className="text-[#E43E1C]" />
             </div>
           </div>
 
-          {/* Grid qismi: Mobilda 1 ta, planshetda 2 ta, kompyuterda 4 ta */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             {certificates.map((cert) => (
               <motion.div
                 key={cert.id}
-                whileHover={{ y: -15, scale: 1.02 }}
+                whileHover={{ y: -10, scale: 1.02 }}
                 onClick={() => setSelectedCert(cert)}
                 className="group relative aspect-[3/4] bg-white dark:bg-zinc-900 rounded-[2.5rem] overflow-hidden cursor-pointer shadow-xl border border-zinc-100 dark:border-zinc-800"
               >
                 <img
                   src={cert.img}
-                  className="w-full h-full object-cover opacity-90 transition-all duration-700 group-hover:scale-110 group-hover:opacity-100"
+                  className="w-full h-full object-cover opacity-90 transition-all duration-500 group-hover:scale-105 group-hover:opacity-100"
                   alt="Cert"
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent flex flex-col justify-end p-6 md:p-8">
                   <p className="text-[#39B54A] text-[8px] md:text-[9px] font-black uppercase tracking-[0.3em] mb-2">
@@ -222,14 +216,16 @@ export default function Blog() {
         </div>
       </section>
 
-      {/* --- 🖼 MODAL (Details View) --- */}
+      {/* MODAL */}
       <AnimatePresence>
         {selectedCert && (
-          <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+          <motion.div
+            className="fixed inset-0 z-[1000] flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div
               onClick={() => setSelectedCert(null)}
               className="absolute inset-0 bg-black/98 backdrop-blur-2xl"
             />
@@ -250,6 +246,7 @@ export default function Blog() {
                   src={selectedCert.img}
                   className="w-full h-full object-cover"
                   alt="Cert"
+                  loading="lazy"
                 />
               </div>
               <div className="md:w-1/2 p-10 md:p-16 flex flex-col justify-center">
@@ -274,7 +271,7 @@ export default function Blog() {
                 </button>
               </div>
             </motion.div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

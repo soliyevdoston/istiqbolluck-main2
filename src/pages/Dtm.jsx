@@ -18,21 +18,17 @@ import {
   Hash,
   Calendar,
   History,
-  Download,
   TrendingUp,
   Zap,
   Brain,
   CheckCircle2,
-  Loader2,
   ArrowUpRight,
   ArrowDownRight,
   Minus,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
+import { motion } from "framer-motion";
 
-// 1. YORDAMCHI FUNKSIYALAR (Initialization xatosi bo'lmasligi uchun komponentdan tashqarida)
+// 1. YORDAMCHI FUNKSIYALAR
 const roundNum = (num) => Math.round(parseFloat(num || 0) * 10) / 10;
 
 const DEFAULT_STUDENT = {
@@ -63,7 +59,6 @@ export default function DtmPremium() {
   const [currentId, setCurrentId] = useState("0000");
   const [testIndex, setTestIndex] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [isDownloading, setIsDownloading] = useState(false);
   const [studentsData, setStudentsData] = useState({ 1001: DEFAULT_STUDENT });
   const reportRef = useRef(null);
 
@@ -181,71 +176,10 @@ export default function DtmPremium() {
     } else alert("ID topilmadi!");
   };
 
-  const downloadPDF = async () => {
-    if (isDownloading) return;
-    setIsDownloading(true);
-    try {
-      const canvas = await html2canvas(reportRef.current, {
-        scale: 2,
-        backgroundColor: "#f8fafc",
-        useCORS: true,
-        logging: false,
-        onclone: (clonedDoc) => {
-          const elements = clonedDoc.getElementsByTagName("*");
-          for (let i = 0; i < elements.length; i++) {
-            const style = window.getComputedStyle(elements[i]);
-            if (
-              style.color.includes("oklab") ||
-              style.backgroundColor.includes("oklab")
-            ) {
-              elements[i].style.color = "#333";
-            }
-          }
-        },
-      });
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      pdf.addImage(
-        imgData,
-        "PNG",
-        0,
-        0,
-        210,
-        (canvas.height * 210) / canvas.width,
-      );
-      pdf.save(`DTM_Natija_${student.name.replace(/\s+/g, "_")}.pdf`);
-    } catch (e) {
-      console.error(e);
-      alert("PDF yuklashda xatolik yuz berdi.");
-    }
-    setIsDownloading(false);
-  };
-
   if (loading)
     return (
-      <div className="h-screen flex flex-col items-center justify-center bg-white dark:bg-[#050505] transition-colors duration-500">
-        <style>{`
-          @keyframes spinY { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
-          .animate-spin-y { animation: spinY 3s linear infinite; perspective: 1000px; transform-style: preserve-3d; }
-        `}</style>
-        <div className="relative">
-          <div className="absolute inset-0 rounded-full blur-3xl bg-[#39B54A]/10 animate-pulse"></div>
-          <img
-            src="/logo.svg"
-            alt="Loading..."
-            className="w-24 h-24 md:w-32 md:h-32 object-contain animate-spin-y relative z-10"
-            onError={(e) => {
-              e.target.style.display = "none";
-              e.target.nextSibling.style.display = "block";
-            }}
-          />
-          <div style={{ display: "none" }}>
-            <Loader2 className="animate-spin text-[#39B54A]" size={50} />
-          </div>
-        </div>
-        <p className="mt-8 text-zinc-400 dark:text-zinc-600 font-black uppercase tracking-[0.4em] animate-pulse text-[10px]">
-          Yuklanmoqda...
-        </p>
+      <div className="h-screen flex items-center justify-center bg-white dark:bg-[#050505] transition-colors duration-500">
+        <img src="/logo.svg" alt="Logo" className="w-20 h-20 animate-spin-y" />
       </div>
     );
 
@@ -253,10 +187,7 @@ export default function DtmPremium() {
     <div className="min-h-screen lg:h-screen bg-[#f8fafc] dark:bg-[#050505] pt-20 pb-4 px-4 lg:px-8 font-sans flex flex-col transition-all lg:overflow-hidden">
       <div className="max-w-[1600px] mx-auto w-full flex-1 flex flex-col gap-4 min-h-0">
         {/* SEARCH HEADER */}
-        <div
-          className="flex flex-col md:flex-row justify-between items-center gap-4 shrink-0"
-          data-html2canvas-ignore="true"
-        >
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 shrink-0">
           <div className="flex items-center gap-3">
             <div className="bg-black p-2 rounded-xl border border-[#39B54A]/30 shadow-lg">
               <Zap className="text-[#39B54A]" size={24} />
@@ -320,7 +251,7 @@ export default function DtmPremium() {
             </div>
           </div>
 
-          {/* CENTER: DIAGRAMMA (FIXED Height Container) */}
+          {/* CENTER: DIAGRAMMA */}
           <div className="lg:col-span-6 bg-white dark:bg-zinc-900 p-6 rounded-[2.5rem] shadow-2xl border border-white dark:border-zinc-800 flex flex-col min-h-0">
             <div className="flex justify-between items-center mb-6 shrink-0">
               <h3 className="text-lg font-black uppercase italic dark:text-white flex items-center gap-2 leading-none">
@@ -328,8 +259,6 @@ export default function DtmPremium() {
                 {currentTest.date} natijasi
               </h3>
             </div>
-
-            {/* Chart parent div must have defined height or flex-1 with min-h */}
             <div className="flex-1 min-h-[250px] w-full relative">
               <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <BarChart
@@ -380,7 +309,6 @@ export default function DtmPremium() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-
             <div className="grid grid-cols-5 gap-2 mt-6 border-t border-zinc-100 dark:border-zinc-800 pt-4 shrink-0">
               {currentTest.stats.map((item, i) => (
                 <div
@@ -446,28 +374,12 @@ export default function DtmPremium() {
                   "{aiProgress.feedback}"
                 </p>
               </div>
-              <button
-                onClick={downloadPDF}
-                disabled={isDownloading}
-                className="w-full py-4 mt-4 bg-black dark:bg-[#39B54A] text-white dark:text-black rounded-2xl font-black flex items-center justify-center gap-2 uppercase tracking-widest text-xs shadow-xl"
-              >
-                {isDownloading ? (
-                  <Loader2 className="animate-spin" size={16} />
-                ) : (
-                  <>
-                    <Download size={18} /> PDF HISOBOT
-                  </>
-                )}
-              </button>
             </div>
           </div>
         </div>
 
         {/* HISTORY Panorama */}
-        <div
-          className="shrink-0 h-14 flex items-center gap-3 px-6 bg-white dark:bg-zinc-900 rounded-xl border border-white dark:border-zinc-800 overflow-x-auto no-scrollbar"
-          data-html2canvas-ignore="true"
-        >
+        <div className="shrink-0 h-14 flex items-center gap-3 px-6 bg-white dark:bg-zinc-900 rounded-xl border border-white dark:border-zinc-800 overflow-x-auto no-scrollbar">
           <History size={16} className="text-slate-400 shrink-0" />
           <div className="flex gap-2">
             {student.history.map((t, i) => (

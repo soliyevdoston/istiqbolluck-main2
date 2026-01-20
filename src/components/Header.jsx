@@ -1,34 +1,50 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { NavLink, Link, useLocation } from "react-router-dom";
 import { Phone, Menu, X, Instagram, Send, Youtube } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Logo from "/logo.svg";
 import ThemeToggle from "./ThemeToggle";
 
+/* 🔒 STATIC NAV LINKS (har renderda qayta yaratilmaydi) */
+const NAV_LINKS = [
+  { to: "/", label: "Biz haqimizda" },
+  { to: "/dtm", label: "Dtm" },
+  { to: "/life", label: "Maktab hayoti" },
+  { to: "/team", label: "Jamoamiz" },
+  { to: "/blog", label: "Blog" },
+];
+
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
 
+  /* 🔒 Route change bo‘lsa menu yopiladi */
   useEffect(() => {
     setIsOpen(false);
   }, [location]);
 
+  /* 🔒 BODY SCROLL LOCK — XAVFSIZ (cleanup bilan) */
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "unset";
+
+    return () => {
+      document.body.style.overflow = "unset";
+    };
   }, [isOpen]);
 
-  const scrollToTop = () => {
+  /* 🔒 STABLE HANDLER */
+  const scrollToTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     setIsOpen(false);
-  };
+  }, []);
 
-  const navLinks = [
-    { to: "/", label: "Biz haqimizda" },
-    { to: "/dtm", label: "Dtm" },
-    { to: "/life", label: "Maktab hayoti" },
-    { to: "/team", label: "Jamoamiz" },
-    { to: "/blog", label: "Blog" },
-  ];
+  const toggleMenu = useCallback(() => {
+    setIsOpen((prev) => !prev);
+  }, []);
+
+  const closeMenu = useCallback(() => {
+    setIsOpen(false);
+  }, []);
 
   return (
     <>
@@ -52,7 +68,7 @@ export default function Header() {
 
         {/* DESKTOP NAVIGATION */}
         <nav className="hidden lg:flex gap-8 xl:gap-10 font-bold text-[10px] xl:text-[11px] uppercase tracking-widest">
-          {navLinks.map((link) => (
+          {NAV_LINKS.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}
@@ -84,12 +100,12 @@ export default function Header() {
             href="tel:+998901234567"
             className="bg-[#39B54A] text-white p-2 md:p-3 rounded-full hover:scale-105 transition-transform flex items-center justify-center shadow-md"
           >
-            <Phone size={16} md:size={18} fill="currentColor" />
+            <Phone size={16} fill="currentColor" />
           </a>
 
           {/* BURGER BUTTON */}
           <button
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={toggleMenu}
             className="lg:hidden p-2 text-zinc-900 dark:text-white transition-colors"
           >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -97,7 +113,7 @@ export default function Header() {
         </div>
       </header>
 
-      {/* MOBILE MENU OVERLAY */}
+      {/* MOBILE MENU */}
       <AnimatePresence>
         {isOpen && (
           <>
@@ -105,7 +121,7 @@ export default function Header() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsOpen(false)}
+              onClick={closeMenu}
               className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] lg:hidden"
             />
 
@@ -121,7 +137,7 @@ export default function Header() {
                   Menu
                 </span>
                 <button
-                  onClick={() => setIsOpen(false)}
+                  onClick={closeMenu}
                   className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-full dark:text-white"
                 >
                   <X size={18} />
@@ -129,14 +145,18 @@ export default function Header() {
               </div>
 
               <nav className="flex flex-col gap-4 flex-1">
-                {navLinks.map((link) => (
+                {NAV_LINKS.map((link) => (
                   <NavLink
                     key={link.to}
                     to={link.to}
                     onClick={scrollToTop}
                     className={({ isActive }) => `
                       text-lg font-bold italic uppercase tracking-tight transition-all py-2
-                      ${isActive ? "text-[#39B54A] border-l-4 border-[#39B54A] pl-3" : "text-zinc-800 dark:text-white"}
+                      ${
+                        isActive
+                          ? "text-[#39B54A] border-l-4 border-[#39B54A] pl-3"
+                          : "text-zinc-800 dark:text-white"
+                      }
                     `}
                   >
                     {link.label}
@@ -144,7 +164,6 @@ export default function Header() {
                 ))}
               </nav>
 
-              {/* Bottom Mobile Info */}
               <div className="mt-auto space-y-6 pt-6 border-t border-gray-100 dark:border-zinc-800">
                 <div className="space-y-1">
                   <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">

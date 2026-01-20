@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"; // useEffect ni import qiling
+import React, { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { blogPosts } from "../data/blogData";
 import { motion } from "framer-motion";
@@ -6,13 +6,17 @@ import { ArrowLeft, Calendar, Tag } from "lucide-react";
 
 export default function BlogDetail() {
   const { id } = useParams();
-  const post = blogPosts.find((p) => p.id === parseInt(id));
 
-  // --- SAHIFA YUKLANGANDA TEPAGA CHIQARISH MANTIQI ---
+  // --- Postni topish (parseInt xavfsiz) ---
+  const post = React.useMemo(
+    () => blogPosts.find((p) => p.id === Number(id)),
+    [id],
+  );
+
+  // --- SAHIFA YUKLANGANDA TEPAGA CHIQARISH ---
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [id]); // ID o'zgarganda skroll tepaga chiqadi
-  // -----------------------------------------------
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [id]);
 
   if (!post)
     return (
@@ -55,6 +59,7 @@ export default function BlogDetail() {
           src={post.image}
           className="w-full h-auto rounded-[2rem] md:rounded-[3rem] mb-12 shadow-2xl"
           alt={post.title}
+          loading="lazy" // rasmlarni lazy yuklash qo‘shildi
         />
 
         <div className="prose prose-xl dark:prose-invert max-w-none">

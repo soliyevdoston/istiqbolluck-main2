@@ -5,19 +5,15 @@ import {
   Computer,
   Book,
   ArrowRight,
-  Target,
-  ShieldCheck,
-  Star,
-  Palette,
   Trophy,
-  Music,
-  Zap,
-  Compass,
-  Lightbulb,
   Camera,
+  Compass,
+  ShieldCheck,
+  Zap,
+  Lightbulb,
 } from "lucide-react";
 
-// Ma'lumotlar
+// Ma'lumotlar importi
 import {
   missions,
   facilities,
@@ -25,38 +21,35 @@ import {
   galleryRow2,
 } from "../data/schoolLifeData";
 
+// Qo'shimcha klublar
 const extraClubs = [
   {
     icon: <Trophy size={28} />,
     title: "Sport Klublari",
     desc: "Sog‘lom tana va g‘oliblik ruhi",
     color: "#F59E0B",
-    bg: "#FFFBEB",
   },
   {
     icon: <Tv size={28} />,
     title: "Madaniy Hordiq",
     desc: "Filmlar va madaniy dam olish",
     color: "#8B5CF6",
-    bg: "#F5F3FF",
   },
   {
     icon: <Computer size={28} />,
     title: "Kompyuter va IT",
     desc: "Dasturlash va IT loyihalar",
     color: "#0EA5E9",
-    bg: "#EFF6FF",
   },
   {
     icon: <Book size={28} />,
     title: "Qo‘shimcha Darslar",
     desc: "Fanlar bo‘yicha chuqur tayyorgarlik",
     color: "#F97316",
-    bg: "#FFF7ED",
   },
 ];
 
-// --- 🛠 INTERAKTIV SEAMLESS DRAGGABLE MARQUEE ---
+// --- Draggable Marquee Component ---
 const DraggableMarquee = ({ items, reverse = false }) => {
   const containerRef = useRef(null);
   const controls = useAnimation();
@@ -79,9 +72,8 @@ const DraggableMarquee = ({ items, reverse = false }) => {
   };
 
   useEffect(() => {
-    if (containerRef.current) {
+    if (containerRef.current)
       setContentWidth(containerRef.current.scrollWidth / 3);
-    }
   }, [items]);
 
   useEffect(() => {
@@ -94,9 +86,6 @@ const DraggableMarquee = ({ items, reverse = false }) => {
 
   return (
     <div className="flex overflow-hidden whitespace-nowrap py-3 relative cursor-grab active:cursor-grabbing">
-      <div className="hidden md:block absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#fcfcfc] dark:from-[#050505] to-transparent z-10 pointer-events-none"></div>
-      <div className="hidden md:block absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[#fcfcfc] dark:from-[#050505] to-transparent z-10 pointer-events-none"></div>
-
       <motion.div
         ref={containerRef}
         drag="x"
@@ -124,6 +113,7 @@ const DraggableMarquee = ({ items, reverse = false }) => {
   );
 };
 
+// --- Main Component ---
 export default function SchoolLife() {
   const scrollTargetRef = useRef(null);
   const scrollToSection = () =>
@@ -131,13 +121,11 @@ export default function SchoolLife() {
 
   return (
     <div className="bg-[#fcfcfc] dark:bg-[#050505] transition-colors min-h-screen font-sans overflow-x-hidden">
-      {/* 1. 🚀 HERO SECTION (RESPONSIVE OPTIMIZED) */}
       <section className="relative min-h-screen w-full flex items-center justify-center px-6 py-20 lg:py-0 overflow-hidden">
-        {/* Background Ambient Glow - Mobilda ham ko'rinadi, bo'shliqni to'ldiradi */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl aspect-square bg-[#39B54A]/10 blur-[120px] rounded-full pointer-events-none"></div>
 
         <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center">
-          {/* Text Content - Mobilda text-center bo'ladi */}
+          {/* Text */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -150,7 +138,6 @@ export default function SchoolLife() {
                 Atmosferamiz
               </span>
             </div>
-
             <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[110px] font-black tracking-tighter dark:text-white leading-[0.85] italic uppercase mb-8">
               MAKTAB <br />
               <span
@@ -160,7 +147,6 @@ export default function SchoolLife() {
                 HAYOTI
               </span>
             </h1>
-
             <p className="text-base sm:text-xl md:text-2xl font-black text-zinc-500 uppercase italic max-w-lg mb-10 leading-snug">
               Har bir lahza —{" "}
               <span className="text-zinc-900 dark:text-white">
@@ -168,7 +154,6 @@ export default function SchoolLife() {
               </span>{" "}
               qo'yilgan ulkan qadamdir.
             </p>
-
             <button
               onClick={scrollToSection}
               className="group flex items-center gap-5 text-xs font-black uppercase tracking-widest text-[#39B54A] bg-white dark:bg-zinc-900 px-8 py-4 rounded-full shadow-xl border border-[#39B54A]/20 hover:scale-105 transition-all"
@@ -180,15 +165,16 @@ export default function SchoolLife() {
             </button>
           </motion.div>
 
-          {/* Hero Image Block - Faqat Desktopda */}
+          {/* Hero Image - faqat 1100px+ da */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8, rotate: 0 }}
             animate={{ opacity: 1, scale: 1, rotate: 3 }}
             transition={{ duration: 1 }}
-            className="relative hidden lg:block justify-self-end"
+            className="relative hidden lg:block ml-auto z-10"
+            style={{ width: "min(450px, 30vw)" }}
           >
             <div className="absolute inset-0 bg-[#39B54A]/20 blur-[80px] rounded-full"></div>
-            <div className="relative aspect-[4/5] w-[400px] xl:w-[450px] rounded-[4rem] overflow-hidden border-[12px] border-white dark:border-zinc-900 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)]">
+            <div className="relative aspect-[4/5] rounded-[4rem] overflow-hidden border-[12px] border-white dark:border-zinc-900 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)]">
               <img
                 src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=2070&auto=format&fit=crop"
                 className="w-full h-full object-cover"
@@ -205,18 +191,18 @@ export default function SchoolLife() {
         </div>
       </section>
 
-      {/* 2. GALEREYA SECTION */}
+      {/* 2. GALLERY */}
       <section
         ref={scrollTargetRef}
         className="py-8 md:py-24 bg-white dark:bg-[#080808] border-y dark:border-zinc-900"
       >
         <DraggableMarquee items={galleryRow1} />
         <div className="mt-4">
-          <DraggableMarquee items={galleryRow2} reverse={true} />
+          <DraggableMarquee items={galleryRow2} reverse />
         </div>
       </section>
 
-      {/* 3. CLUBS SECTION */}
+      {/* 3. CLUBS */}
       <section className="py-16 md:py-32 bg-[#f4f4f4] dark:bg-zinc-950 px-4 md:px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center lg:text-left mb-12 md:mb-20">
@@ -248,7 +234,7 @@ export default function SchoolLife() {
         </div>
       </section>
 
-      {/* 4. YO'NALISHLAR (1030PX+ FIXED) */}
+      {/* 4. MISSIONS / YO'NALISHLAR */}
       <section className="py-16 md:py-32 bg-white dark:bg-black transition-colors px-6 border-t dark:border-zinc-900">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row justify-between items-center lg:items-end mb-12 lg:mb-24 gap-8">
