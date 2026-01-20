@@ -56,21 +56,16 @@ export default function DtmPremium() {
   const [loading, setLoading] = useState(true);
   const [studentsData, setStudentsData] = useState({ "0000": DEFAULT_STUDENT });
 
-  const SHEET_ID = "1maHii6PdtN3aHvDOS3jMvTbQX11_bnEWOWfjyIVfyGU";
-  const SHEET_NAME = "dtms";
-
   useEffect(() => {
     let active = true;
     const fetchSheetsData = async () => {
       try {
-        const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}`;
+        const url = `https://docs.google.com/spreadsheets/d/1maHii6PdtN3aHvDOS3jMvTbQX11_bnEWOWfjyIVfyGU/gviz/tq?tqx=out:json&sheet=dtms`;
         const response = await fetch(url);
         const text = await response.text();
         const json = JSON.parse(text.substring(47).slice(0, -2));
-        const rows = json.table.rows;
-
         const formatted = { "0000": DEFAULT_STUDENT };
-        rows.forEach((row) => {
+        json.table.rows.forEach((row) => {
           const c = row.c;
           const id = c[2]?.v ? String(c[2].v) : null;
           if (!id) return;
@@ -123,7 +118,6 @@ export default function DtmPremium() {
             ],
           });
         });
-
         if (active) {
           setStudentsData(formatted);
           setLoading(false);
@@ -149,9 +143,9 @@ export default function DtmPremium() {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    const cleanId = searchId.trim();
-    if (studentsData[cleanId]) {
-      setCurrentId(cleanId);
+    const sid = searchId.trim();
+    if (studentsData[sid]) {
+      setCurrentId(sid);
       setTestIndex(0);
     } else alert("ID topilmadi!");
   };
@@ -165,17 +159,26 @@ export default function DtmPremium() {
     );
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#050505] pt-24 pb-10 px-4 lg:px-8 font-sans transition-all duration-500 overflow-x-hidden">
-      <div className="max-w-[1600px] mx-auto w-full flex flex-col gap-6">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#050505] transition-all duration-500 overflow-x-hidden">
+      <div className="max-w-[1600px] mx-auto w-full px-4 lg:px-8 pt-24 pb-10 flex flex-col gap-6">
         {/* HEADER / SEARCH */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 shrink-0">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col lg:flex-row justify-between items-center gap-6 shrink-0">
+          <div className="flex items-center gap-3 shrink-0">
             <div className="bg-black p-2 rounded-xl border border-[#39B54A]/30 shadow-lg">
               <Zap className="text-[#39B54A]" size={24} />
             </div>
-            <h1 className="text-xl md:text-3xl font-black italic uppercase dark:text-white tracking-tighter leading-none">
+            <h1 className="text-xl md:text-3xl font-black italic uppercase dark:text-white tracking-tighter">
               DTM <span className="text-slate-400">CORE</span>
             </h1>
+          </div>
+          <div className="hidden md:block flex-1 max-w-[500px] text-center px-4">
+            <p className="text-[11px] lg:text-[13px] font-bold leading-relaxed text-slate-500 dark:text-zinc-400 italic">
+              DTM natijalarini ko‘rish endi juda oson. O‘quvchi ID raqamini
+              kiriting va imtihon natijasini bir zumda bilib oling.
+              <span className="text-[#39B54A]/80 ml-1">
+                Ota-onalar va o‘quvchilar uchun qulay xizmat.
+              </span>
+            </p>
           </div>
           <form
             onSubmit={handleSearch}
@@ -184,7 +187,7 @@ export default function DtmPremium() {
             <input
               type="text"
               placeholder="ID raqam..."
-              className="w-full py-3 px-6 rounded-2xl bg-white dark:bg-zinc-900 shadow-xl outline-none font-bold dark:text-white border border-zinc-200 dark:border-zinc-800"
+              className="w-full py-3 px-6 rounded-2xl bg-white dark:bg-zinc-900 shadow-xl outline-none font-bold dark:text-white border border-zinc-200 dark:border-zinc-800 focus:border-[#39B54A]/50 transition-all"
               value={searchId}
               onChange={(e) => setSearchId(e.target.value)}
             />
@@ -197,10 +200,55 @@ export default function DtmPremium() {
           </form>
         </div>
 
-        {/* MAIN DASHBOARD */}
+        {/* DASHBOARD GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-0">
-          {/* LEFT: STATS */}
-          <div className="lg:col-span-2 grid grid-cols-2 lg:flex lg:flex-col gap-3 min-h-0">
+          {/* PROFILE CARD - MOBILE: 1, DESKTOP: RIGHT */}
+          <div className="order-1 lg:order-3 lg:col-span-4 flex flex-col gap-6">
+            <div className="bg-[#0f172a] p-8 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden border border-[#39B54A]/20">
+              <h2 className="text-2xl lg:text-3xl font-black uppercase italic leading-none mb-6 break-words">
+                {student.name}
+              </h2>
+              <div className="grid grid-cols-2 gap-4 border-t border-white/10 pt-6">
+                <div className="flex items-center gap-2 text-sm font-bold text-slate-300">
+                  <School className="text-[#39B54A]" size={18} />{" "}
+                  {student.class}
+                </div>
+                <div className="flex items-center gap-2 text-sm font-bold text-slate-300">
+                  <Target className="text-[#39B54A]" size={18} />{" "}
+                  {student.direction}
+                </div>
+              </div>
+            </div>
+
+            {/* AI PROGRESS - Mobile'da diagrammadan keyin, Desktopda Profil ostida */}
+            <div className="hidden lg:flex flex-1 bg-white dark:bg-zinc-900 p-8 rounded-[2.5rem] shadow-xl border border-white dark:border-zinc-800 flex-col">
+              <div className="flex items-center gap-3 mb-6 shrink-0">
+                <div className="p-2 bg-purple-500/10 rounded-xl text-purple-500">
+                  <Brain size={24} />
+                </div>
+                <h4 className="text-lg font-black italic uppercase dark:text-white leading-none">
+                  AI Progress
+                </h4>
+              </div>
+              <div className="flex-1 flex flex-col justify-center">
+                <div className="flex items-center justify-between bg-slate-50 dark:bg-zinc-800 p-4 rounded-2xl border dark:border-zinc-700 mb-6">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Dinamika
+                  </p>
+                  <div className="flex items-center text-[#39B54A] font-black text-lg">
+                    <ArrowUpRight size={20} /> +2.4
+                  </div>
+                </div>
+                <p className="text-sm text-slate-600 dark:text-zinc-300 font-medium italic border-l-4 border-[#39B54A] pl-4 leading-relaxed line-clamp-4">
+                  "Natijangizda barqaror o'sish bor. Matematika blokidagi
+                  xatolarni kamaytirish tavsiya etiladi."
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* LEFT STATS - ORDER 2 */}
+          <div className="order-2 lg:order-1 lg:col-span-2 grid grid-cols-2 lg:flex lg:flex-col gap-3">
             <StatCard
               icon={<TrendingUp size={20} />}
               label="Reyting"
@@ -225,9 +273,8 @@ export default function DtmPremium() {
               value={currentTest.grantChance + "%"}
               color="green"
             />
-
             <div className="col-span-2 lg:flex-1 bg-white dark:bg-zinc-900 p-6 rounded-[2rem] shadow-xl border-2 border-white dark:border-zinc-800 flex flex-col items-center justify-center text-center">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">
                 Jami Ball
               </p>
               <p className="text-5xl font-black text-[#39B54A] italic leading-none">
@@ -236,14 +283,13 @@ export default function DtmPremium() {
             </div>
           </div>
 
-          {/* CENTER: DIAGRAMMA (Qotmaydigan qismlar) */}
-          <div className="lg:col-span-6 bg-white dark:bg-zinc-900 p-6 rounded-[2.5rem] shadow-2xl border border-white dark:border-zinc-800 flex flex-col min-h-[450px] overflow-hidden">
+          {/* CENTER DIAGRAMMA - ORDER 3 */}
+          <div className="order-3 lg:order-2 lg:col-span-6 bg-white dark:bg-zinc-900 p-6 md:p-8 rounded-[2.5rem] shadow-2xl border border-white dark:border-zinc-800 flex flex-col min-h-[450px] overflow-hidden">
             <h3 className="text-lg font-black uppercase italic dark:text-white flex items-center gap-2 mb-8 shrink-0">
               <Calendar className="text-[#39B54A]" size={20} />{" "}
               {currentTest.date} natijasi
             </h3>
-
-            <div className="flex-1 w-full relative min-h-0 overflow-hidden">
+            <div className="flex-1 w-full relative min-h-0">
               <ResponsiveContainer width="100%" height="100%" debounce={100}>
                 <BarChart
                   data={currentTest.stats}
@@ -297,53 +343,24 @@ export default function DtmPremium() {
             </div>
           </div>
 
-          {/* RIGHT: PROFILE & AI */}
-          <div className="lg:col-span-4 flex flex-col gap-6 min-h-0">
-            <div className="bg-[#0f172a] p-8 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden border border-[#39B54A]/20 shrink-0">
-              <h2 className="text-2xl md:text-3xl font-black uppercase italic leading-none mb-6 break-words">
-                {student.name}
-              </h2>
-              <div className="grid grid-cols-2 gap-4 border-t border-white/10 pt-6">
-                <div className="flex items-center gap-2 text-md font-bold text-slate-300">
-                  <School className="text-[#39B54A]" size={18} />{" "}
-                  {student.class}
-                </div>
-                <div className="flex items-center gap-2 text-md font-bold text-slate-300">
-                  <Target className="text-[#39B54A]" size={18} />{" "}
-                  {student.direction}
-                </div>
+          {/* AI PROGRESS - MOBILE ONLY ORDER 4 */}
+          <div className="order-4 lg:hidden bg-white dark:bg-zinc-900 p-6 rounded-[2.5rem] shadow-xl border border-white dark:border-zinc-800">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-purple-500/10 rounded-xl text-purple-500">
+                <Brain size={20} />
               </div>
+              <h4 className="text-lg font-black italic uppercase dark:text-white leading-none">
+                AI Progress
+              </h4>
             </div>
-
-            <div className="flex-1 bg-white dark:bg-zinc-900 p-8 rounded-[2.5rem] shadow-xl border border-white dark:border-zinc-800 flex flex-col min-h-0">
-              <div className="flex items-center gap-3 mb-6 shrink-0">
-                <div className="p-2 bg-purple-500/10 rounded-xl text-purple-500">
-                  <Brain size={24} />
-                </div>
-                <h4 className="text-lg font-black italic uppercase dark:text-white leading-none">
-                  AI Progress
-                </h4>
-              </div>
-              <div className="flex-1 flex flex-col justify-center min-h-0">
-                <div className="flex items-center justify-between bg-slate-50 dark:bg-zinc-800 p-4 rounded-2xl border dark:border-zinc-700 mb-6 shrink-0">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">
-                    Dinamika
-                  </p>
-                  <div className="flex items-center text-[#39B54A] font-black text-lg">
-                    <ArrowUpRight size={20} /> +2.4
-                  </div>
-                </div>
-                <p className="text-sm text-slate-600 dark:text-zinc-300 font-medium italic border-l-4 border-[#39B54A] pl-4 leading-relaxed line-clamp-4">
-                  "Natijangizda barqaror o'sish bor. Matematika blokidagi
-                  xatolarni kamaytirish tavsiya etiladi."
-                </p>
-              </div>
-            </div>
+            <p className="text-sm italic text-zinc-500 border-l-4 border-[#39B54A] pl-4">
+              "Matematika blokidagi natijangiz o'suvchi."
+            </p>
           </div>
         </div>
 
-        {/* HISTORY Panorama */}
-        <div className="shrink-0 h-16 flex items-center gap-3 px-6 bg-white dark:bg-zinc-900 rounded-2xl border dark:border-zinc-800 overflow-x-auto no-scrollbar shadow-sm">
+        {/* HISTORY */}
+        <div className="h-16 flex items-center gap-3 px-6 bg-white dark:bg-zinc-900 rounded-2xl border dark:border-zinc-800 overflow-x-auto no-scrollbar shadow-sm">
           <History size={16} className="text-slate-400 shrink-0" />
           <div className="flex gap-2">
             {student.history.map((t, i) => (
@@ -362,7 +379,6 @@ export default function DtmPremium() {
   );
 }
 
-// MEMOIZED STAT CARD TO PREVENT UNNECESSARY RENDERS
 const StatCard = memo(({ icon, label, value, color }) => {
   const themes = {
     blue: "border-blue-500/20 text-blue-500 bg-blue-500/5",
@@ -372,10 +388,10 @@ const StatCard = memo(({ icon, label, value, color }) => {
   };
   return (
     <div
-      className={`p-4 rounded-2xl border-2 ${themes[color]} bg-white dark:bg-zinc-900 flex flex-col items-center justify-center text-center shadow-md transition-all hover:scale-[1.02] shrink-0`}
+      className={`p-4 rounded-2xl border-2 ${themes[color]} bg-white dark:bg-zinc-900 flex flex-col items-center justify-center text-center shadow-md transition-all shrink-0`}
     >
       <div className="mb-1">{icon}</div>
-      <p className="text-[8px] font-black uppercase text-zinc-400 tracking-[0.1em] mb-1 leading-none">
+      <p className="text-[8px] font-black uppercase text-zinc-400 mb-1 leading-none">
         {label}
       </p>
       <p className="text-lg font-black dark:text-white leading-none italic">
